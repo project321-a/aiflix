@@ -6,16 +6,11 @@ import { prisma } from '@/lib/prisma'
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'Please sign in' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Please sign in' }, { status: 401 })
     }
 
     const { plan } = await request.json()
-    
     const planDurations: Record<string, number> = {
       monthly: 30,
       quarterly: 90,
@@ -23,26 +18,15 @@ export async function POST(request: Request) {
     }
 
     if (!planDurations[plan]) {
-      return NextResponse.json(
-        { error: 'Invalid plan' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
     }
 
-    // Handle downgrade to free
     if (plan === 'free') {
-      const user = await prisma.user.update({
+      await prisma.user.update({
         where: { email: session.user.email },
-        data: {
-          subscriptionTier: 'free',
-          subscriptionExpiresAt: null,
-        }
+        data: { subscriptionTier: 'free', subscriptionExpiresAt: null }
       })
-      return NextResponse.json({
-        success: true,
-        plan: 'free',
-        expiresAt: null,
-      })
+      return NextResponse.json({ success: true, plan: 'free' })
     }
 
     const expiresAt = new Date()
@@ -50,68 +34,44 @@ export async function POST(request: Request) {
 
     const user = await prisma.user.update({
       where: { email: session.user.email },
-      data: {
-        subscriptionTier: plan,
-        subscriptionExpiresAt: expiresAt,
-      }
+      data: { subscriptionTier: plan, subscriptionExpiresAt: expiresAt }
     })
 
-    return NextResponse.json({
-      success: true,
-      plan: user.subscriptionTier,
-      expiresAt: user.subscriptionExpiresAt,
-    })
+    return NextResponse.json({ success: true, plan: user.subscriptionTier, expiresAt: user.subscriptionExpiresAt })
 
   } catch (error) {
     console.error('Subscription error:', error)
-    return NextResponse.json(
-      { error: 'Something went wrong' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
   }
 }
 
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'Please sign in' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Please sign in' }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: {
-        subscriptionTier: true,
-        subscriptionExpiresAt: true,
-      }
+      select: { subscriptionTier: true, subscriptionExpiresAt: true }
     })
 
-    // Check if subscription is expired
     if (user?.subscriptionExpiresAt && user.subscriptionExpiresAt < new Date()) {
       await prisma.user.update({
         where: { email: session.user.email },
-        data: {
-          subscriptionTier: 'free',
-          subscriptionExpiresAt: null,
-        }
+        data: { subscriptionTier: 'free', subscriptionExpiresAt: null }
       })
       return NextResponse.json({ plan: 'free', expiresAt: null })
     }
 
     return NextResponse.json({
       plan: user?.subscriptionTier || 'free',
-      expiresAt: user?.subscriptionExpiresAt || null,
+      expiresAt: user?.subscriptionExpiresAt || null
     })
 
   } catch (error) {
     console.error('GET subscription error:', error)
-    return NextResponse.json(
-      { error: 'Something went wrong' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
   }
 }

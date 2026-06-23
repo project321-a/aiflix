@@ -1,8 +1,8 @@
+import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-import { NextAuthOptions } from 'next-auth'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -24,24 +24,14 @@ export const authOptions: NextAuthOptions = {
 
         if (!user) throw new Error('User not found')
 
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash
-        )
-
+        const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
         if (!isValid) throw new Error('Invalid password')
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        }
+        return { id: user.id, email: user.email, name: user.name }
       }
     })
   ],
-  session: {
-    strategy: 'jwt',
-  },
+  session: { strategy: 'jwt' },
   callbacks: {
     async jwt({ token, user }) {
       if (user) token.id = user.id
@@ -54,8 +44,6 @@ export const authOptions: NextAuthOptions = {
       return session
     }
   },
-  pages: {
-    signIn: '/login',
-  },
+  pages: { signIn: '/login' },
   secret: process.env.NEXTAUTH_SECRET,
 }

@@ -1,94 +1,56 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import NextAuth from 'next-auth'
-
-const handler = NextAuth(authOptions)
-
-// helper to safely get session (NO getServerSession)
-async function getSession(req: Request) {
-  const res = await handler.auth?.(req as any)
-  return res?.user ? res : null
-}
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession(request)
-
+    const session = await getServerSession(authOptions)
+    
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'Please sign in to watch' },
+        { error: 'Please sign in' },
         { status: 401 }
       )
     }
 
     const { videoId } = await request.json()
-
     const user = await prisma.user.findUnique({
       where: { email: session.user.email }
     })
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    const video = await prisma.video.findUnique({
-      where: { id: videoId }
-    })
-
-    if (!video) {
-      return NextResponse.json(
-        { error: 'Video not found' },
-        { status: 404 }
-      )
-    }
-
+    // Premium users skip ads
     if (user.subscriptionTier !== 'free') {
-      return NextResponse.json({
-        unlocked: true,
-        streamUrl: video.fullVideoUrl || null,
-        message: 'Premium user — no ads!'
-      })
+      const video = await prisma.video.findUnique({ where: { id: videoId } })
+      return NextResponse.json({ unlocked: true, streamUrl: video?.fullVideoUrl || null })
     }
 
+    // Check existing ad watch
     const existingAdWatch = await prisma.adWatch.findFirst({
-      where: {
-        userId: user.id,
-        videoId,
-        completed: true
-      }
+      where: { userId: user.id, videoId, completed: true }
     })
 
     if (existingAdWatch) {
-      return NextResponse.json({
-        unlocked: true,
-        streamUrl: video.fullVideoUrl || null,
-        message: 'Video unlocked!'
-      })
+      const video = await prisma.video.findUnique({ where: { id: videoId } })
+      return NextResponse.json({ unlocked: true, streamUrl: video?.fullVideoUrl || null })
     }
 
+    // Record ad watch
     await prisma.adWatch.create({
-      data: {
-        userId: user.id,
-        videoId,
-        completed: true
-      }
+      data: { userId: user.id, videoId, completed: true }
     })
 
-    return NextResponse.json({
-      unlocked: true,
-      streamUrl: video.fullVideoUrl || null,
-      message: 'Video unlocked!'
-    })
+    const video = await prisma.video.findUnique({ where: { id: videoId } })
+    return NextResponse.json({ unlocked: true, streamUrl: video?.fullVideoUrl || null })
 
   } catch (error) {
     console.error('Ad unlock error:', error)
-
     return NextResponse.json(
-      { error: 'Something went wrong. Please try again.' },
+      { error: 'Something went wrong' },
       { status: 500 }
     )
   }

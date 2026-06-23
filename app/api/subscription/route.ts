@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -15,7 +16,6 @@ export async function POST(request: Request) {
 
     const { plan } = await request.json()
     
-    // Define plan durations (in days)
     const planDurations: Record<string, number> = {
       monthly: 30,
       quarterly: 90,
@@ -27,6 +27,22 @@ export async function POST(request: Request) {
         { error: 'Invalid plan' },
         { status: 400 }
       )
+    }
+
+    // Handle downgrade to free
+    if (plan === 'free') {
+      const user = await prisma.user.update({
+        where: { email: session.user.email },
+        data: {
+          subscriptionTier: 'free',
+          subscriptionExpiresAt: null,
+        }
+      })
+      return NextResponse.json({
+        success: true,
+        plan: 'free',
+        expiresAt: null,
+      })
     }
 
     const expiresAt = new Date()
@@ -57,7 +73,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
     
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -76,7 +92,6 @@ export async function GET(request: Request) {
 
     // Check if subscription is expired
     if (user?.subscriptionExpiresAt && user.subscriptionExpiresAt < new Date()) {
-      // Downgrade to free if expired
       await prisma.user.update({
         where: { email: session.user.email },
         data: {

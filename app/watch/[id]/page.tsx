@@ -19,6 +19,12 @@ interface VideoData {
   thumbnail: string
 }
 
+// Helper to extract YouTube ID
+function getYouTubeId(url: string): string {
+  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)
+  return match ? match[1] : ''
+}
+
 export default function WatchPage() {
   const { id } = useParams() as { id: string }
   const { data: session } = useSession()
@@ -31,7 +37,6 @@ export default function WatchPage() {
   const [loading, setLoading] = useState(true)
   const [unlockError, setUnlockError] = useState('')
 
-  // Fetch video data from database
   useEffect(() => {
     fetch(`/api/video/${id}`)
       .then(res => res.json())
@@ -44,7 +49,6 @@ export default function WatchPage() {
       })
   }, [id])
 
-  // Ad countdown timer
   useEffect(() => {
     if (!isAdPhase) return
     if (adCountdown <= 0) {
@@ -64,12 +68,10 @@ export default function WatchPage() {
         body: JSON.stringify({ videoId: id })
       })
       const data = await res.json()
-      
       if (data.unlocked) {
         setIsUnlocked(true)
         setIsAdPhase(false)
         setAdCountdown(10)
-        // If we have a stream URL, we could use it
         if (data.streamUrl) {
           console.log('Stream URL:', data.streamUrl)
         }
@@ -86,21 +88,18 @@ export default function WatchPage() {
   }
 
   const handleWatch = () => {
-    // Check if user is signed in
     if (!session) {
       alert('Please sign in to watch videos.')
       router.push('/login')
       return
     }
 
-    // For premium videos, show subscription prompt
     if (video?.isPremium) {
       alert('This is a premium video. Please subscribe to watch.')
       router.push('/subscribe')
       return
     }
 
-    // Show ad gate
     setIsAdPhase(true)
     setAdCountdown(10)
   }
@@ -127,15 +126,16 @@ export default function WatchPage() {
     )
   }
 
+  const isYouTube = video.fullVideoUrl?.includes('youtube.com') || video.fullVideoUrl?.includes('youtu.be')
+  const youtubeId = isYouTube ? getYouTubeId(video.fullVideoUrl || '') : null
+
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-black text-white pt-16">
         <div className="max-w-6xl mx-auto px-4 py-8">
-          {/* Player container */}
           <div className="relative bg-gray-900 rounded-xl overflow-hidden aspect-video">
             {!isUnlocked && !isAdPhase && (
-              // Trailer / lock screen
               <div 
                 className="w-full h-full bg-cover bg-center relative"
                 style={{ backgroundImage: `url(${video.trailerClipUrl || video.thumbnail})` }}
@@ -162,7 +162,6 @@ export default function WatchPage() {
             )}
 
             {isAdPhase && (
-              // Ad overlay
               <div className="w-full h-full bg-gradient-to-br from-gray-900 to-purple-900/50 flex flex-col items-center justify-center">
                 <div className="text-center">
                   <div className="text-6xl font-bold text-purple-400 mb-4">{adCountdown}</div>
@@ -176,15 +175,23 @@ export default function WatchPage() {
             )}
 
             {isUnlocked && (
-              // Full video playback
               <div className="w-full h-full bg-black flex items-center justify-center">
                 {video.fullVideoUrl ? (
-                  <video
-                    src={video.fullVideoUrl}
-                    controls
-                    autoPlay
-                    className="w-full h-full"
-                  />
+                  isYouTube && youtubeId ? (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+                      className="w-full h-full"
+                      allowFullScreen
+                      allow="autoplay; encrypted-media"
+                    />
+                  ) : (
+                    <video
+                      src={video.fullVideoUrl}
+                      controls
+                      autoPlay
+                      className="w-full h-full"
+                    />
+                  )
                 ) : (
                   <div className="text-center">
                     <div className="text-green-400 text-6xl mb-4">▶</div>
@@ -205,7 +212,6 @@ export default function WatchPage() {
             )}
           </div>
 
-          {/* Video info */}
           <div className="mt-6">
             <h1 className="text-2xl font-bold">{video.title}</h1>
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-400">

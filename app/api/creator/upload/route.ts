@@ -7,7 +7,10 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Please sign in' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Please sign in' },
+        { status: 401 }
+      )
     }
 
     const user = await prisma.user.findUnique({
@@ -15,13 +18,19 @@ export async function POST(request: Request) {
     })
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
     }
 
     const { title, description, genre, region, type, videoUrl, thumbnailUrl } = await request.json()
 
     if (!title || !videoUrl) {
-      return NextResponse.json({ error: 'Title and video URL are required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Title and video URL are required' },
+        { status: 400 }
+      )
     }
 
     const video = await prisma.video.create({
@@ -41,12 +50,19 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      video: { id: video.id, title: video.title, status: video.status }
+      video: {
+        id: video.id,
+        title: video.title,
+        status: video.status,
+      }
     })
 
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json({ error: 'Failed to upload video' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to upload video' },
+      { status: 500 }
+    )
   }
 }
 
@@ -54,7 +70,10 @@ export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Please sign in' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Please sign in' },
+        { status: 401 }
+      )
     }
 
     const user = await prisma.user.findUnique({
@@ -62,7 +81,10 @@ export async function GET(request: Request) {
     })
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
     }
 
     const videos = await prisma.video.findMany({
@@ -74,6 +96,9 @@ export async function GET(request: Request) {
 
   } catch (error) {
     console.error('Fetch videos error:', error)
-    return NextResponse.json({ error: 'Failed to fetch videos' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to fetch videos' },
+      { status: 500 }
+    )
   }
 }

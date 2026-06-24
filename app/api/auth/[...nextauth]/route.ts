@@ -1,9 +1,6 @@
-import { NextResponse } from 'next/server'
+import { authOptions } from '@/lib/auth'
+import NextAuth from 'next-auth'
 
-export async function GET() {
-  return NextResponse.json({ ok: true })
-}
+const handler = NextAuth(authOptions)
 
-export async function POST() {
-  return NextResponse.json({ ok: true })
-}
+export { handler as GET, handler as POST }

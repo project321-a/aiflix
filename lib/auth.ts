@@ -1,81 +1,53 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcryptjs'
+import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: {
-          label: 'Email',
-          type: 'email',
-        },
-        password: {
-          label: 'Password',
-          type: 'password',
-        },
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' }
       },
-
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          throw new Error('Email and password required')
         }
 
         const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
+          where: { email: credentials.email }
         })
 
-        if (!user) {
-          return null
-        }
+        if (!user) throw new Error('User not found')
 
-        const validPassword = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash
-        )
-
-        if (!validPassword) {
-          return null
-        }
+        const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
+        if (!isValid) throw new Error('Invalid password')
 
         return {
           id: user.id,
           email: user.email,
-          name: user.name ?? '',
+          name: user.name,
         }
-      },
-    }),
+      }
+    })
   ],
-
-  session: {
-    strategy: 'jwt',
-  },
-
+  session: { strategy: 'jwt' },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-      }
-
+      if (user) token.id = user.id
       return token
     },
-
     async session({ session, token }) {
-      if (session.user) {
+      if (session.user && token) {
         ;(session.user as any).id = token.id
       }
-
       return session
-    },
+    }
   },
-
-  pages: {
-    signIn: '/login',
-  },
-
+  pages: { signIn: '/login' },
   secret: process.env.NEXTAUTH_SECRET,
 }

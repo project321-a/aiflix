@@ -41,11 +41,15 @@ export async function POST(request: Request) {
       success: true, 
       user: { id: user.id, email: user.email, name: user.name } 
     })
-  } catch (error) {
-    console.error('Signup error:', error)
-    return NextResponse.json(
-      { error: 'Something went wrong' },
-      { status: 500 }
-    )
+  } catch (error: any) {
+  console.error('Signup error:', error)
+
+  return NextResponse.json(
+    {
+      error: error?.message || 'Unknown error'
+    },
+    { status: 500 }
+  )
   }
+
 }

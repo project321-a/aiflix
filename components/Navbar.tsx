@@ -26,11 +26,11 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b border-gray-800 px-6 h-16 flex items-center justify-between">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-          <Play size={16} fill="white" color="white" />
-        </div>
-        <span className="text-xl font-bold">AI<span className="text-purple-400">Flix</span></span>
-      </Link>
+  <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+    <Play size={16} fill="white" color="white" />
+  </div>
+  <span className="text-xl font-bold text-white">Stream<span className="text-purple-500">AIV</span></span>
+</Link>
 
       {/* Navigation Links */}
       <div className="flex items-center gap-6">

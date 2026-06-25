@@ -3,8 +3,8 @@ import './globals.css'
 import Providers from './providers'
 
 export const metadata: Metadata = {
-  title: 'AIFlix - AI Video Streaming',
-  description: 'Watch AI-generated movies, series, and shorts',
+  title: 'StreamAIV - AI-Powered Entertainment',
+  description: 'Watch AI-generated movies, series, and shorts from around the world',
 }
 
 export default function RootLayout({

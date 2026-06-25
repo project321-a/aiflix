@@ -8,46 +8,58 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  passwordHash  String
-  role          String    @default("viewer")
-  subscriptionTier String @default("free")
-  subscriptionExpiresAt DateTime? // 👈 Add this line
-  videos        Video[]
-  adWatches     AdWatch[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                        String     @id @default(cuid())
+  email                     String     @unique
+  name                      String?
+  passwordHash              String
+  role                      String     @default("viewer")
+  subscriptionTier          String     @default("free")
+  subscriptionExpiresAt     DateTime?
+
+  videos                    Video[]
+  adWatches                 AdWatch[]
+
+  createdAt                 DateTime   @default(now())
+  updatedAt                 DateTime   @updatedAt
 }
 
 model Video {
-  id              String    @id @default(cuid())
+  id              String     @id @default(cuid())
   title           String
   description     String?
   genre           String
   region          String
   type            String
+
   trailerClipUrl  String?
   fullVideoUrl    String?
   cloudflareUid   String?
+
   creatorId       String
-  creator         User      @relation(fields: [creatorId], references: [id])
-  views           Int       @default(0)
+  creator         User       @relation(fields: [creatorId], references: [id])
+
+  views           Int        @default(0)
   adWatches       AdWatch[]
-  isPublished     Boolean   @default(false)
-  status          String    @default("draft")
-  segment         String?   @default("Power Struggle") // 👈 Add this line
-  revenue         Float     @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+
+  isPublished     Boolean    @default(false)
+  status          String     @default("draft")
+  segment         String?    @default("Power Struggle")
+  revenue         Float      @default(0)
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 }
-Watch {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  videoId   String
-  video     Video    @relation(fields: [videoId], references: [id])
-  completed Boolean  @default(false)
-  createdAt DateTime @default(now())
+
+model AdWatch {
+  id          String    @id @default(cuid())
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+
+  videoId     String
+  video       Video     @relation(fields: [videoId], references: [id])
+
+  completed   Boolean   @default(false)
+
+  createdAt   DateTime  @default(now())
 }

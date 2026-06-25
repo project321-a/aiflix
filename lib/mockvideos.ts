@@ -15,6 +15,7 @@ export interface Video {
   isFeatured: boolean;
   uploadedAt: string;
   rating: number;
+  segment: string; // 👈 Added: Power Struggle, War God, Tycoon Life, Workplace, Time Travel, Apocalypse
 }
 
 export const MOCK_VIDEOS: Video[] = [
@@ -34,13 +35,14 @@ export const MOCK_VIDEOS: Video[] = [
     isPremium: false,
     isFeatured: true,
     uploadedAt: '2025-11-01',
-    rating: 4.8
+    rating: 4.8,
+    segment: 'Power Struggle'
   },
   {
     id: '2',
     title: 'Seoul Dream',
     thumbnail: 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=400&h=225&fit=crop',
-    description: 'A KDrama-style AI romance series set in futuristic Seoul.',
+    description: 'A KDrama-style AI romance series set in futuristic Seoul. Two rivals discover love while building an AI.',
     genre: 'Romance',
     region: 'KDrama',
     type: 'series',
@@ -52,7 +54,8 @@ export const MOCK_VIDEOS: Video[] = [
     isPremium: false,
     isFeatured: true,
     uploadedAt: '2025-10-15',
-    rating: 4.9
+    rating: 4.9,
+    segment: 'Workplace'
   },
   {
     id: '3',
@@ -69,13 +72,14 @@ export const MOCK_VIDEOS: Video[] = [
     isPremium: true,
     isFeatured: true,
     uploadedAt: '2025-09-20',
-    rating: 4.7
+    rating: 4.7,
+    segment: 'War God'
   },
   {
     id: '4',
     title: 'Neon Paris',
     thumbnail: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=225&fit=crop',
-    description: 'A French thriller where a detective chases an AI-generated phantom across cyberpunk Paris.',
+    description: 'A French thriller where a detective chases an AI-generated phantom across cyberpunk Paris streets.',
     genre: 'Thriller',
     region: 'Europe',
     type: 'series',
@@ -87,7 +91,8 @@ export const MOCK_VIDEOS: Video[] = [
     isPremium: true,
     isFeatured: false,
     uploadedAt: '2025-11-10',
-    rating: 4.6
+    rating: 4.6,
+    segment: 'Time Travel'
   },
   {
     id: '5',
@@ -104,7 +109,8 @@ export const MOCK_VIDEOS: Video[] = [
     isPremium: false,
     isFeatured: false,
     uploadedAt: '2025-08-05',
-    rating: 4.5
+    rating: 4.5,
+    segment: 'War God'
   },
   {
     id: '6',
@@ -122,7 +128,8 @@ export const MOCK_VIDEOS: Video[] = [
     isPremium: false,
     isFeatured: true,
     uploadedAt: '2025-10-28',
-    rating: 4.8
+    rating: 4.8,
+    segment: 'Time Travel'
   },
   {
     id: '7',
@@ -139,7 +146,8 @@ export const MOCK_VIDEOS: Video[] = [
     isPremium: true,
     isFeatured: true,
     uploadedAt: '2025-11-20',
-    rating: 4.9
+    rating: 4.9,
+    segment: 'Apocalypse'
   },
   {
     id: '8',
@@ -157,7 +165,8 @@ export const MOCK_VIDEOS: Video[] = [
     isPremium: false,
     isFeatured: false,
     uploadedAt: '2025-09-01',
-    rating: 4.4
+    rating: 4.4,
+    segment: 'Tycoon Life'
   },
   {
     id: '9',
@@ -175,7 +184,8 @@ export const MOCK_VIDEOS: Video[] = [
     isPremium: true,
     isFeatured: true,
     uploadedAt: '2025-10-01',
-    rating: 5.0
+    rating: 5.0,
+    segment: 'Power Struggle'
   },
   {
     id: '10',
@@ -193,8 +203,18 @@ export const MOCK_VIDEOS: Video[] = [
     isPremium: false,
     isFeatured: false,
     uploadedAt: '2025-11-05',
-    rating: 4.6
+    rating: 4.6,
+    segment: 'Workplace'
   }
+];
+
+export const SEGMENTS = [
+  'Power Struggle',
+  'War God',
+  'Tycoon Life',
+  'Workplace',
+  'Time Travel',
+  'Apocalypse'
 ];
 
 export const GENRES = ['All', 'Action', 'Romance', 'Drama', 'Thriller', 'Sci-Fi', 'Historical', 'Fantasy', 'Crime', 'Documentary'];

@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import Navbar from '@/components/Navbar'
 import { 
   Upload, Film, BarChart2, DollarSign, Users, TrendingUp, 
-  Plus, Info, Play, Eye, Clock, Check, X
+  Plus, Info, Play, Eye, Check, X
 } from 'lucide-react'
 
 interface Video {
@@ -20,6 +20,7 @@ interface Video {
   revenue: number
   createdAt: string
   fullVideoUrl: string
+  segment?: string
 }
 
 export default function CreatorStudio() {
@@ -35,11 +36,21 @@ export default function CreatorStudio() {
   const [genre, setGenre] = useState('Action')
   const [region, setRegion] = useState('Africa')
   const [type, setType] = useState('movie')
+  const [segment, setSegment] = useState('Power Struggle')
   const [videoUrl, setVideoUrl] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [uploading, setUploading] = useState(false)
   const [uploadMessage, setUploadMessage] = useState('')
   const [uploadError, setUploadError] = useState('')
+
+  const segments = [
+    'Power Struggle',
+    'War God',
+    'Tycoon Life',
+    'Workplace',
+    'Time Travel',
+    'Apocalypse'
+  ]
 
   useEffect(() => {
     if (!session) {
@@ -84,6 +95,7 @@ export default function CreatorStudio() {
           genre,
           region,
           type,
+          segment,
           videoUrl,
           thumbnailUrl,
         })
@@ -244,6 +256,8 @@ export default function CreatorStudio() {
                               <span>•</span>
                               <span>{v.region}</span>
                               <span>•</span>
+                              {v.segment && <span className="text-purple-400">{v.segment}</span>}
+                              <span>•</span>
                               {getStatusBadge(v.status)}
                             </div>
                           </div>
@@ -302,7 +316,7 @@ export default function CreatorStudio() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium mb-1">Genre</label>
                       <select
@@ -327,6 +341,9 @@ export default function CreatorStudio() {
                         ))}
                       </select>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium mb-1">Type</label>
                       <select
@@ -337,6 +354,18 @@ export default function CreatorStudio() {
                         <option value="movie">Movie</option>
                         <option value="series">Series</option>
                         <option value="short">Short</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Segment</label>
+                      <select
+                        value={segment}
+                        onChange={(e) => setSegment(e.target.value)}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
+                      >
+                        {segments.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -424,6 +453,8 @@ export default function CreatorStudio() {
                             <span className="text-xs text-gray-400">{v.genre}</span>
                             <span className="text-xs text-gray-400">•</span>
                             <span className="text-xs text-gray-400">{v.region}</span>
+                            <span className="text-xs text-gray-400">•</span>
+                            {v.segment && <span className="text-xs text-purple-400">{v.segment}</span>}
                             <span className="text-xs text-gray-400">•</span>
                             {getStatusBadge(v.status)}
                           </div>

@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { title, description, genre, region, type, videoUrl, thumbnailUrl } = await request.json()
+    const { title, description, genre, region, type, videoUrl, thumbnailUrl, segment } = await request.json()
 
     if (!title || !videoUrl) {
       return NextResponse.json(
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
         creatorId: user.id,
         isPublished: true,
         status: 'ready',
+        segment: segment || 'Power Struggle',
       }
     })
 
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
         id: video.id,
         title: video.title,
         status: video.status,
+        segment: (video as any).segment || 'Power Struggle',
       }
     })
 

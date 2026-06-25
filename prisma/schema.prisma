@@ -30,19 +30,19 @@ model Video {
   type            String
   trailerClipUrl  String?
   fullVideoUrl    String?
-  cloudflareUid   String?   // Unique ID from Cloudflare Stream
+  cloudflareUid   String?
   creatorId       String
   creator         User      @relation(fields: [creatorId], references: [id])
   views           Int       @default(0)
   adWatches       AdWatch[]
-  status          String    @default("draft") // 
   isPublished     Boolean   @default(false)
+  status          String    @default("draft")
+  segment         String?   @default("Power Struggle") // 👈 Add this line
   revenue         Float     @default(0)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 }
-
-model AdWatch {
+Watch {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id])

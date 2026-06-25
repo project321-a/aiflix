@@ -569,7 +569,7 @@ export default function SubscribePage() {
 
                 <div className="mt-4 flex items-center justify-center gap-3 text-xs text-gray-500">
                   <Shield size={14} />
-                  <span>Secured by AIFlix</span>
+                  <span>Secured by StreamAIV</span>
                   <span>·</span>
                   <span>256-bit encryption</span>
                 </div>
@@ -602,12 +602,12 @@ export default function SubscribePage() {
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm font-bold">AI</span>
+                    <span className="text-white text-sm font-bold">S</span>
                   </div>
-                  <span className="text-xl font-bold">AIFlix</span>
+                  <span className="text-xl font-bold text-white">Stream<span className="text-purple-500">AIV</span></span>
                 </div>
                 <p className="text-gray-400 text-sm">
-                  Watch unlimited AI-generated movies, series, and shorts. No ads. Cancel anytime.
+                  Watch AI-powered entertainment. Stream movies, series, and shorts. No ads. Cancel anytime.
                 </p>
               </div>
 
@@ -646,7 +646,7 @@ export default function SubscribePage() {
                   </a>
                 </div>
                 <div className="mt-4 text-xs text-gray-500">
-                  <p>© 2026 AIFlix. All rights reserved.</p>
+                  <p>© 2026 StreamAIV. All rights reserved.</p>
                   <p className="mt-1">Made with ❤️ for AI content creators</p>
                 </div>
               </div>

@@ -37,6 +37,10 @@ export default function HomePage() {
             </div>
             <h1 className="text-5xl font-bold mb-3">{hero.title}</h1>
             <p className="text-gray-300 text-lg max-w-xl mb-6">{hero.description}</p>
+            {/* ✅ Brand tagline added */}
+            <p className="text-purple-400 text-sm font-semibold tracking-wider mb-6">
+              🎬 AI-Powered Entertainment — Watch Now
+            </p>
             <button
               onClick={() => handleOpenVideo(hero)}
               className="bg-purple-600 hover:bg-purple-700 px-8 py-3 rounded-lg font-semibold flex items-center gap-2 transition"

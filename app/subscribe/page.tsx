@@ -623,9 +623,9 @@ export default function SubscribePage() {
               <div>
                 <h4 className="font-semibold mb-3">Support</h4>
                 <ul className="space-y-2 text-sm text-gray-400">
-                  <li><a href="#" className="hover:text-white transition">Help Center</a></li>
-                  <li><a href="#" className="hover:text-white transition">Contact Us</a></li>
-                  <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-white transition">Terms of Service</a></li>
+                <li><a href="/privacy" className="hover:text-white transition">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-white transition">Contact Us</a></li>
                 </ul>
               </div>
 

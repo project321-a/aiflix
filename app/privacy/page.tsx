@@ -15,8 +15,7 @@ export default function PrivacyPage() {
               <ul className="list-disc pl-6 space-y-2">
                 <li>Email address and account details</li>
                 <li>Content you upload</li>
-                <li>Watch history and preferences</li>
-                <li>Payment information (processed securely through our partners)</li>
+                <li>Watch history</li>
               </ul>
             </section>
 
@@ -26,7 +25,6 @@ export default function PrivacyPage() {
                 <li>To provide and improve our service</li>
                 <li>To personalize your experience</li>
                 <li>To process payments and revenue share</li>
-                <li>To communicate with you about updates</li>
               </ul>
             </section>
 
@@ -36,32 +34,16 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-white mb-3">4. Third-Party Services</h2>
-              <p>We use:</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Supabase – database hosting</li>
-                <li>Vercel – application hosting</li>
-                <li>Stripe – payment processing (future)</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-white mb-3">5. Your Rights</h2>
+              <h2 className="text-2xl font-semibold text-white mb-3">4. Your Rights</h2>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Access your data</li>
                 <li>Request deletion of your data</li>
-                <li>Opt out of marketing communications</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold text-white mb-3">6. Cookies</h2>
-              <p>We use cookies to remember your preferences and improve your experience. You can disable cookies in your browser settings.</p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold text-white mb-3">7. Contact</h2>
-              <p>Email us at: privacy@aiflix.com</p>
+              <h2 className="text-2xl font-semibold text-white mb-3">5. Contact</h2>
+              <p>Email: privacy@streamaiv.com</p>
             </section>
 
             <p className="text-sm text-gray-500 mt-8">Last updated: June 2026</p>

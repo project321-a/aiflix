@@ -1,11 +1,11 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Navbar from '@/components/Navbar'
 import { 
-  Upload, Film, BarChart2, DollarSign, Users, TrendingUp, 
-  Plus, Info, Play, Eye, Check, X
+  Upload, Film, BarChart2, DollarSign, 
+  Plus, Info, Play, Eye, Check, Link2
 } from 'lucide-react'
 
 interface Video {
@@ -30,7 +30,7 @@ export default function CreatorStudio() {
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Upload form
+  // Upload form state
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [genre, setGenre] = useState('Action')
@@ -39,9 +39,15 @@ export default function CreatorStudio() {
   const [segment, setSegment] = useState('Power Struggle')
   const [videoUrl, setVideoUrl] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
+  const [uploadMethod, setUploadMethod] = useState<'file' | 'url'>('url')
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadMessage, setUploadMessage] = useState('')
   const [uploadError, setUploadError] = useState('')
+  
+  const videoInputRef = useRef<HTMLInputElement>(null)
+  const thumbnailInputRef = useRef<HTMLInputElement>(null)
 
   const segments = [
     'Power Struggle',
@@ -74,10 +80,33 @@ export default function CreatorStudio() {
     }
   }
 
+  const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setVideoFile(e.target.files[0])
+    }
+  }
+
+  const handleThumbnailFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setThumbnailFile(e.target.files[0])
+    }
+  }
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title || !videoUrl) {
-      setUploadError('Title and Video URL are required')
+    
+    if (!title) {
+      setUploadError('Title is required')
+      return
+    }
+
+    if (uploadMethod === 'url' && !videoUrl) {
+      setUploadError('Video URL is required')
+      return
+    }
+
+    if (uploadMethod === 'file' && !videoFile) {
+      setUploadError('Please select a video file')
       return
     }
 
@@ -86,6 +115,18 @@ export default function CreatorStudio() {
     setUploadMessage('')
 
     try {
+      let finalVideoUrl = videoUrl
+      
+      // If uploading a file, convert to base64 (or use a free upload service)
+      if (uploadMethod === 'file' && videoFile) {
+        const reader = new FileReader()
+        const videoData = await new Promise<string>((resolve) => {
+          reader.onload = () => resolve(reader.result as string)
+          reader.readAsDataURL(videoFile)
+        })
+        finalVideoUrl = videoData
+      }
+
       const res = await fetch('/api/creator/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -96,8 +137,8 @@ export default function CreatorStudio() {
           region,
           type,
           segment,
-          videoUrl,
-          thumbnailUrl,
+          videoUrl: finalVideoUrl,
+          thumbnailUrl: thumbnailUrl || '',
         })
       })
 
@@ -108,6 +149,10 @@ export default function CreatorStudio() {
         setDescription('')
         setVideoUrl('')
         setThumbnailUrl('')
+        setVideoFile(null)
+        setThumbnailFile(null)
+        if (videoInputRef.current) videoInputRef.current.value = ''
+        if (thumbnailInputRef.current) thumbnailInputRef.current.value = ''
         fetchVideos()
         setTimeout(() => setUploadMessage(''), 5000)
       } else {
@@ -117,16 +162,6 @@ export default function CreatorStudio() {
       setUploadError('Something went wrong')
     } finally {
       setUploading(false)
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ready': return 'text-green-400'
-      case 'processing': return 'text-yellow-400'
-      case 'draft': return 'text-gray-400'
-      case 'failed': return 'text-red-400'
-      default: return 'text-gray-400'
     }
   }
 
@@ -140,7 +175,6 @@ export default function CreatorStudio() {
     }
   }
 
-  // Stats
   const totalViews = videos.reduce((sum, v) => sum + v.views, 0)
   const totalRevenue = videos.reduce((sum, v) => sum + v.revenue, 0)
   const totalVideos = videos.length
@@ -370,35 +404,109 @@ export default function CreatorStudio() {
                     </div>
                   </div>
 
+                  {/* Upload Method Toggle */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Video URL *</label>
-                    <input
-                      type="url"
-                      value={videoUrl}
-                      onChange={(e) => setVideoUrl(e.target.value)}
-                      placeholder="https://your-video-url.mp4"
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
-                      required
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      For production, use Cloudflare Stream or YouTube embed URL
-                    </p>
+                    <label className="block text-sm font-medium mb-2">Upload Method</label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setUploadMethod('url')}
+                        className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition ${
+                          uploadMethod === 'url'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                        }`}
+                      >
+                        <Link2 size={16} /> Video URL
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setUploadMethod('file')}
+                        className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition ${
+                          uploadMethod === 'file'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                        }`}
+                      >
+                        <Upload size={16} /> Upload File
+                      </button>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Thumbnail URL</label>
-                    <input
-                      type="url"
-                      value={thumbnailUrl}
-                      onChange={(e) => setThumbnailUrl(e.target.value)}
-                      placeholder="https://your-thumbnail-image.jpg"
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
-                    />
-                  </div>
+                  {/* URL Method */}
+                  {uploadMethod === 'url' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Video URL *</label>
+                        <input
+                          type="url"
+                          value={videoUrl}
+                          onChange={(e) => setVideoUrl(e.target.value)}
+                          placeholder="https://www.youtube.com/watch?v=... or direct MP4 link"
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
+                          required={uploadMethod === 'url'}
+                        />
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">YouTube</span>
+                          <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">Vimeo</span>
+                          <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">Google Drive</span>
+                          <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">Direct MP4</span>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Thumbnail URL (optional)</label>
+                        <input
+                          type="url"
+                          value={thumbnailUrl}
+                          onChange={(e) => setThumbnailUrl(e.target.value)}
+                          placeholder="https://your-thumbnail-image.jpg"
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* File Method */}
+                  {uploadMethod === 'file' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Video File *</label>
+                        <input
+                          ref={videoInputRef}
+                          type="file"
+                          accept="video/*"
+                          onChange={handleVideoFileChange}
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer"
+                          required={uploadMethod === 'file'}
+                        />
+                        {videoFile && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            📹 {videoFile.name} ({(videoFile.size / 1024 / 1024).toFixed(2)} MB)
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">Max file size: 100MB (for larger files, use URL method)</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Thumbnail Image (optional)</label>
+                        <input
+                          ref={thumbnailInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleThumbnailFileChange}
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer"
+                        />
+                        {thumbnailFile && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            🖼️ {thumbnailFile.name}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
 
                   <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-sm text-yellow-400 flex items-start gap-2">
                     <Info size={16} className="flex-shrink-0 mt-0.5" />
-                    <p>Video will be reviewed for quality before being published live.</p>
+                    <p>Videos are hosted on the platform. For best results, use YouTube or direct MP4 URLs.</p>
                   </div>
 
                   <button

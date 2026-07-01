@@ -20,12 +20,17 @@ interface Props {
 
 export default function HeroBanner({ projects }: Props) {
   const router = useRouter()
+  const featured = projects.filter(p => p.coverImage)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  const featured = projects.filter(p => p.coverImage)
-  const hero = featured[currentIndex] || projects[0] || null
+  // If no projects or no cover images, return null
+  if (projects.length === 0 || featured.length === 0) {
+    return null
+  }
+
+  const hero = featured[currentIndex] || projects[0]
 
   useEffect(() => {
     if (featured.length === 0) return
@@ -34,16 +39,10 @@ export default function HeroBanner({ projects }: Props) {
         setCurrentIndex((prev) => (prev + 1) % featured.length)
       }, 6000)
     } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current)
     }
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current)
     }
   }, [isHovering, featured.length])
 
@@ -58,14 +57,9 @@ export default function HeroBanner({ projects }: Props) {
   const goToIndex = (index: number) => setCurrentIndex(index)
 
   const handleWatch = () => {
-    if (!hero) return
     const episodeId = hero.firstEpisode?.id || hero.episodes[0]?.id
-    if (episodeId) {
-      router.push(`/watch/${episodeId}`)
-    }
+    if (episodeId) router.push(`/watch/${episodeId}`)
   }
-
-  if (!hero) return null
 
   return (
     <div
@@ -75,10 +69,9 @@ export default function HeroBanner({ projects }: Props) {
     >
       <div
         className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
-        style={{ backgroundImage: `url(${hero.coverImage || '/default-banner.jpg'})` }}
+        style={{ backgroundImage: `url(${hero.coverImage || ''})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-      
       <div className="relative h-full flex items-center">
         <div className="max-w-4xl px-8 py-32">
           <div className="flex gap-2 mb-4">
@@ -99,7 +92,6 @@ export default function HeroBanner({ projects }: Props) {
           </button>
         </div>
       </div>
-
       {featured.length > 1 && (
         <>
           <button onClick={goToPrevious} className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 rounded-full p-2 transition z-10">
@@ -113,9 +105,7 @@ export default function HeroBanner({ projects }: Props) {
               <button
                 key={index}
                 onClick={() => goToIndex(index)}
-                className={`h-2 rounded-full transition-all ${
-                  index === currentIndex ? 'w-8 bg-purple-600' : 'w-2 bg-gray-400 hover:bg-gray-300'
-                }`}
+                className={`h-2 rounded-full transition-all ${index === currentIndex ? 'w-8 bg-purple-600' : 'w-2 bg-gray-400 hover:bg-gray-300'}`}
               />
             ))}
           </div>

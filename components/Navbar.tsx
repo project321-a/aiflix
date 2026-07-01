@@ -31,7 +31,6 @@ export default function Navbar() {
     }
   }
 
-  // Show a simple loading state while session is loading
   if (status === 'loading') {
     return (
       <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b border-gray-800 px-6 h-16 flex items-center justify-between">
@@ -89,7 +88,7 @@ export default function Navbar() {
           </Link>
         )}
 
-        {/* 👇 Admin Link — only visible to admin users */}
+        {/* Admin Link — visible only to admin users */}
         {session && (session.user as any)?.role === 'admin' && (
           <Link href="/admin" className={`text-sm ${pathname === '/admin' ? 'text-white' : 'text-gray-400'} hover:text-white transition`}>
             Admin

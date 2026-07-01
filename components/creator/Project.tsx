@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Film, Plus, Edit, Trash2, Eye } from 'lucide-react'
 import ProjectDetail from './ProjectDetail'
+import EditProjectModal from './EditProjectModal'
 
 interface Project {
   id: string
@@ -11,11 +12,12 @@ interface Project {
   region: string
   type: string
   status: string
-  isPublished: boolean // 👈 ADD THIS
+  isPublished: boolean
   episodes: any[]
   views: number
   revenue: number
   createdAt: string
+  coverImage?: string
 }
 
 export default function Projects() {
@@ -24,6 +26,8 @@ export default function Projects() {
   const [showForm, setShowForm] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [showDetail, setShowDetail] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingProject, setEditingProject] = useState<Project | null>(null)
 
   const fetchProjects = async () => {
     try {
@@ -239,7 +243,6 @@ export default function Projects() {
                   <div className="text-xs text-gray-500 mt-1">
                     {p.type === 'movie' ? '🎬 Movie' : '📺 Series'} · {p.episodes?.length || 0} episodes · {p.views || 0} views
                   </div>
-                  {/* 👇 STATUS BADGE */}
                   <div className="text-xs mt-2">
                     {p.isPublished ? (
                       <span className="text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">✅ Published</span>
@@ -249,7 +252,14 @@ export default function Projects() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="text-gray-400 hover:text-white transition">
+                  <button 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setEditingProject(p); 
+                      setShowEditModal(true); 
+                    }}
+                    className="text-gray-400 hover:text-white transition"
+                  >
                     <Edit size={16} />
                   </button>
                   <button className="text-gray-400 hover:text-red-400 transition">
@@ -267,6 +277,15 @@ export default function Projects() {
         <ProjectDetail
           project={selectedProject}
           onClose={() => setShowDetail(false)}
+          onUpdate={fetchProjects}
+        />
+      )}
+
+      {/* Edit Project Modal */}
+      {showEditModal && editingProject && (
+        <EditProjectModal
+          project={editingProject}
+          onClose={() => { setShowEditModal(false); setEditingProject(null); }}
           onUpdate={fetchProjects}
         />
       )}

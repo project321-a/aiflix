@@ -1,17 +1,22 @@
-'use client';
-import { Play, Star, Eye, Crown } from 'lucide-react';
-import type { Video } from '@/lib/mockvideos';
+'use client'
+import { Play, Star, Eye, Crown } from 'lucide-react'
+import type { Video } from '../lib/mockvideos'
 
 interface Props {
-  video: Video;
-  onOpen: (v: Video) => void;
+  video: Video
+  onOpen: (v: Video) => void
+  index?: number // 👈 Added for staggered animation
 }
 
-export default function VideoCard({ video, onOpen }: Props) {
+export default function VideoCard({ video, onOpen, index = 0 }: Props) {
+  // Staggered delay (50ms per card, max 300ms)
+  const delay = Math.min(index * 50, 300)
+
   return (
     <div
       onClick={() => onOpen(video)}
-      className="bg-gray-900 rounded-xl overflow-hidden cursor-pointer border border-gray-800 hover:border-purple-600 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-900/20"
+      className="bg-gray-900 rounded-xl overflow-hidden cursor-pointer border border-gray-800 hover:border-purple-600 transition-all hover:-translate-y-2 hover:shadow-lg hover:shadow-purple-900/20 animate-fade-in-up"
+      style={{ animationDelay: `${delay}ms` }}
     >
       <div className="relative aspect-video">
         <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
@@ -41,5 +46,5 @@ export default function VideoCard({ video, onOpen }: Props) {
         </div>
       </div>
     </div>
-  );
+  )
 }

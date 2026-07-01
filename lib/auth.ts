@@ -22,10 +22,14 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email }
         })
 
-        if (!user) throw new Error('User not found')
+        if (!user) {
+          throw new Error('User not found')
+        }
 
         const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
-        if (!isValid) throw new Error('Invalid password')
+        if (!isValid) {
+          throw new Error('Invalid password')
+        }
 
         return {
           id: user.id,
@@ -35,10 +39,14 @@ export const authOptions: NextAuthOptions = {
       }
     })
   ],
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+  },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.id = user.id
+      if (user) {
+        token.id = user.id
+      }
       return token
     },
     async session({ session, token }) {
@@ -48,6 +56,8 @@ export const authOptions: NextAuthOptions = {
       return session
     }
   },
-  pages: { signIn: '/login' },
+  pages: {
+    signIn: '/login',
+  },
   secret: process.env.NEXTAUTH_SECRET,
 }

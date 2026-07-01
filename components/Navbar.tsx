@@ -1,4 +1,5 @@
 'use client'
+
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
@@ -8,7 +9,7 @@ import { useState, useEffect } from 'react'
 export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [subscriptionTier, setSubscriptionTier] = useState('free')
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -28,6 +29,21 @@ export default function Navbar() {
     if (searchTerm.trim()) {
       router.push(`/browse?search=${encodeURIComponent(searchTerm.trim())}`)
     }
+  }
+
+  // Show a simple loading state while session is loading
+  if (status === 'loading') {
+    return (
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b border-gray-800 px-6 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+            <Play size={16} fill="white" color="white" />
+          </div>
+          <span className="text-xl font-bold text-white">Stream<span className="text-purple-400">AIV</span></span>
+        </div>
+        <div className="text-gray-400 text-sm">Loading...</div>
+      </nav>
+    )
   }
 
   return (

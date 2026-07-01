@@ -13,8 +13,8 @@ interface Project {
   coverImage: string
   episodes: any[]
   firstEpisode: { id: string } | null
-  views: number          // 👈 Added
-  createdAt: string      // 👈 Added
+  views: number
+  createdAt: string
 }
 
 interface Props {
@@ -45,7 +45,6 @@ export default function VideoRow({ title, type = 'trending', segment = null }: P
         } else if (type === 'popular') {
           filtered = filtered.sort((a: Project, b: Project) => (b.views || 0) - (a.views || 0))
         } else if (type === 'recommended') {
-          // For now, just show random or latest
           filtered = filtered.sort((a: Project, b: Project) => 
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )
@@ -85,11 +84,12 @@ export default function VideoRow({ title, type = 'trending', segment = null }: P
         </Link>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        {projects.map(p => (
+        {projects.map((p, index) => (
           <div
             key={p.id}
             onClick={() => handleWatch(p)}
-            className="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-purple-600 transition cursor-pointer"
+            className="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-purple-600 transition cursor-pointer animate-fade-in-up"
+            style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
           >
             <div className="aspect-video bg-gray-800 flex items-center justify-center">
               {p.coverImage ? (

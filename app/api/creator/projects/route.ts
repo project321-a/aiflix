@@ -1,77 +1,47 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Please sign in' }, { status: 401 })
-    }
+    const url = new URL(request.url)
+    const search = url.searchParams.get('search') || ''
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    })
+    // Build where clause
+    let where: any = { isPublished: true }
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    // If search term exists, filter by title, description, genre, region
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { genre: { contains: search, mode: 'insensitive' } },
+        { region: { contains: search, mode: 'insensitive' } },
+      ]
     }
 
     const projects = await prisma.project.findMany({
-      where: { creatorId: user.id },
+      where,
       orderBy: { createdAt: 'desc' },
-      include: { episodes: true },
-    })
-
-    return NextResponse.json({ projects })
-  } catch (error) {
-    console.error('GET projects error:', error)
-    return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 })
-  }
-}
-
-export async function POST(request: Request) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Please sign in' }, { status: 401 })
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    })
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
-    const body = await request.json()
-    const { title, description, genre, region, type, segmentId } = body
-
-    if (!title || !genre || !region) {
-      return NextResponse.json(
-        { error: 'Title, genre, and region are required' },
-        { status: 400 }
-      )
-    }
-
-    const project = await prisma.project.create({
-      data: {
-        title,
-        description,
-        genre,
-        region,
-        type: type || 'series',
-        segmentId,
-        creatorId: user.id,
-        status: 'draft',
+      include: {
+        episodes: {
+          orderBy: { episodeNumber: 'asc' },
+          take: 1,
+        },
       },
     })
 
-    return NextResponse.json({ success: true, project })
+    // Format response
+    const formatted = projects.map(p => ({
+      ...p,
+      firstEpisode: p.episodes[0] || null,
+    }))
+
+    return NextResponse.json({ projects: formatted })
   } catch (error) {
-    console.error('POST projects error:', error)
-    return NextResponse.json({ error: 'Failed to create project' }, { status: 500 })
+    console.error('Error fetching projects:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch projects' },
+      { status: 500 }
+    )
   }
 }

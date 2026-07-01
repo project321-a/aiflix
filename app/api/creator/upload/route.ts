@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Video URL or file is required' }, { status: 400 })
     }
 
-    // Handle segment (find or create)
+    // Handle segment
     let segmentId: string | undefined
     if (segmentName) {
       const existing = await prisma.segment.findUnique({
@@ -61,7 +61,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // ✅ Create video
     const video = await prisma.video.create({
       data: {
         title,
@@ -76,16 +75,13 @@ export async function POST(request: Request) {
         status: 'ready',
         segmentId,
       },
+      include: { segment: true },
     })
 
     return NextResponse.json({ success: true, video })
-
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json(
-      { error: 'Failed to upload video', details: String(error) },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to upload video' }, { status: 500 })
   }
 }
 
@@ -104,15 +100,16 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    // ✅ Fetch ALL videos (episodes) created by this user
     const videos = await prisma.video.findMany({
       where: { creatorId: user.id },
-      orderBy: { createdAt: 'desc' },
       include: { segment: true },
+      orderBy: { createdAt: 'desc' },
     })
 
     return NextResponse.json({ videos })
   } catch (error) {
-    console.error('GET error:', error)
+    console.error('Error fetching videos:', error)
     return NextResponse.json({ error: 'Failed to fetch videos' }, { status: 500 })
   }
 }

@@ -89,6 +89,13 @@ export default function Navbar() {
           </Link>
         )}
 
+        {/* 👇 Admin Link — only visible to admin users */}
+        {session && (session.user as any)?.role === 'admin' && (
+          <Link href="/admin" className={`text-sm ${pathname === '/admin' ? 'text-white' : 'text-gray-400'} hover:text-white transition`}>
+            Admin
+          </Link>
+        )}
+
         {/* Auth */}
         {session ? (
           <>
